@@ -1,4 +1,4 @@
-# Agora Restaurant Ordering Demo
+# Agora Takeout & Delivery Ordering Demo
 
 Explore a sample menu and build a pickup or delivery order draft. This browser demo uses Agora Conversational AI and fictional reference material. Its output is a spoken draft for the current conversation.
 

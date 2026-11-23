@@ -1,4 +1,4 @@
-# Agora Restaurant Ordering Demo
+# Agora Takeout & Delivery Ordering Demo
 
 ## 1. What you build
 
