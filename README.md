@@ -1,5 +1,9 @@
 # Agora Takeout & Delivery Ordering Demo
 
+[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+
+![Takeout & Delivery Ordering recipe cover](docs/recipe-cover.webp)
+
 Explore a sample menu and build a pickup or delivery order draft. This browser demo uses Agora Conversational AI and fictional reference material. Its output is a spoken draft for the current conversation.
 
 ## Run locally
@@ -28,3 +32,5 @@ Do not collect a delivery address, phone number or payment details. Do not quote
 Run `pnpm run verify` for the template checks, mocked API contracts and production build. Use a real browser voice call to verify the example and correction. See [RECIPE.md](RECIPE.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Scenario inspiration is from [LiveKit's homepage examples](https://github.com/livekit/agents/tree/main/examples/homepage). This implementation uses original prompts and fictional fixtures with the Agora Top-10 template.
+
+Maintainers can build and test the npm scaffold with `pnpm run npm:test`. See the [npm and Vercel setup](https://github.com/littleDogWang/agora-restaurant-ordering-demo/blob/private/docs/npm-release.md).
