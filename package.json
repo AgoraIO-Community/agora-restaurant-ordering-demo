@@ -1,6 +1,6 @@
 {
   "name": "agora-restaurant-ordering-demo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Explore a sample menu and build a pickup or delivery order draft.",
   "private": true,
   "engines": {
@@ -68,10 +68,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/littleDogWang/agora-restaurant-ordering-demo.git"
+    "url": "git+https://github.com/AgoraIO-Community/agora-restaurant-ordering-demo.git"
   },
-  "homepage": "https://github.com/littleDogWang/agora-restaurant-ordering-demo#readme",
+  "homepage": "https://github.com/AgoraIO-Community/agora-restaurant-ordering-demo#readme",
   "bugs": {
-    "url": "https://github.com/littleDogWang/agora-restaurant-ordering-demo/issues"
+    "url": "https://github.com/AgoraIO-Community/agora-restaurant-ordering-demo/issues"
   }
 }

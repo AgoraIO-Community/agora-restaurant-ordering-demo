@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   verify:
-    if: github.repository == 'littleDogWang/agora-restaurant-ordering-demo'
+    if: github.repository == 'AgoraIO-Community/agora-restaurant-ordering-demo'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

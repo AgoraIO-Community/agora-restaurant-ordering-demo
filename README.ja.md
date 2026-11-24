@@ -23,4 +23,4 @@ pnpm dev
 
 「I would like two Garden Pizzas for delivery.」と話し、数量を一つに変更して店頭受け取りに切り替えてみてください。 最後に、更新した内容の要約を依頼してください。
 
-`pnpm run verify` でテンプレート、モック API、本番ビルドを検証できます。音声の動作はブラウザーで実際に通話して確認します。[シナリオの説明](RECIPE.md)と[npm・Vercel の設定](https://github.com/littleDogWang/agora-restaurant-ordering-demo/blob/private/docs/npm-release.md)も参照してください。
+`pnpm run verify` でテンプレート、モック API、本番ビルドを検証できます。音声の動作はブラウザーで実際に通話して確認します。[シナリオの説明](RECIPE.md)と[npm・Vercel の設定](https://github.com/AgoraIO-Community/agora-restaurant-ordering-demo/blob/main/docs/npm-release.md)も参照してください。
