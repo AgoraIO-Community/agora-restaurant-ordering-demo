@@ -61,7 +61,54 @@ async function verifyRejectedOrExpiredRequests() {
   assert.equal((await call(session, 'quoteOrder', { fulfillment: 'pickup' })).code, 'order_too_large');
 }
 
+async function verifyDineIn() {
+  const originalNow = Date.now;
+  Date.now = () => Date.parse('2026-11-26T17:00:00Z'); // Noon in Boston.
+  try {
+    const session = createRestaurantSession();
+    await call(session, 'updateCart', { revision: 0, items: [item] });
+    const noSeat = await call(session, 'quoteOrder', { fulfillment: 'dine-in' });
+    assert.equal(noSeat.code, 'seating_required');
+
+    const options = await call(session, 'findTables', { date: '2026-11-26', time: 'now', partySize: 4 });
+    assert.equal(options.proposal.immediate, true);
+    const { reservation } = await call(session, 'reserveTable', { proposalId: options.proposal.id });
+    const { quote } = await call(session, 'quoteOrder', {
+      fulfillment: 'dine-in', reservationNumber: reservation.number,
+    });
+    assert.equal(quote.reservationNumber, reservation.number);
+    assert.equal(quote.items[0].itemId, item.itemId);
+    assert.equal(quote.deliveryFeeCents, 0);
+    assert.equal(quote.estimatedAt, undefined);
+    const { order } = await call(session, 'placeOrder', { quoteId: quote.id });
+    assert.equal(order.quote.fulfillment, 'dine-in');
+    assert.equal(order.quote.reservationNumber, reservation.number);
+
+    const seated = createRestaurantSession();
+    await call(seated, 'updateCart', { revision: 0, items: [item] });
+    const honoredSeat = await call(seated, 'quoteOrder', { fulfillment: 'dine-in', alreadySeated: true });
+    assert.equal(honoredSeat.quote.fulfillment, 'dine-in');
+  } finally {
+    Date.now = originalNow;
+  }
+}
+
 async function main() {
+  const realNow = Date.now;
+  Date.now = () => Date.parse('2026-11-26T12:05:00Z');
+  try {
+    const beforeOpening = createRestaurantSession();
+    await call(beforeOpening, 'updateCart', { revision: 0, items: [item] });
+    const { quote } = await call(beforeOpening, 'quoteOrder', { fulfillment: 'pickup' });
+    assert.equal(quote.estimatedTimeLabel, 'Nov 26, 2026, 11:13 AM Boston time');
+    assert.equal(quote.scheduledPrepTimeLabel, 'Nov 26, 2026, 11:00 AM Boston time');
+    const { order } = await call(beforeOpening, 'placeOrder', { quoteId: quote.id });
+    assert.equal(order.quote.estimatedTimeLabel, quote.estimatedTimeLabel);
+    assert.equal((await snapshotFor(beforeOpening.readToken)).orders[0].quote.estimatedTimeLabel, quote.estimatedTimeLabel);
+  } finally {
+    Date.now = realNow;
+  }
+  await verifyDineIn();
   await verifyRejectedOrExpiredRequests();
   const a = createRestaurantSession();
   const b = createRestaurantSession();

@@ -18,16 +18,17 @@ const definitions: ToolDefinition[] = [
   ['getStoreRoute', 'Get a simulated route to the Boston store from a demo location.', {
     location: string, mode: { type: 'string', enum: ['walk', 'drive'] },
   }, ['location', 'mode']],
-  ['quoteOrder', 'Get the total and readiness estimate from the current cart. For delivery, provide a demo location.', {
-    fulfillment: { type: 'string', enum: ['pickup', 'delivery'] }, location: string,
+  ['quoteOrder', 'Get the total after the caller chooses dine-in, pickup, or delivery. For delivery, provide a demo location. For dine-in, pass a confirmed reservation number from this call or set alreadySeated when the caller says they already have a table.', {
+    fulfillment: { type: 'string', enum: ['pickup', 'delivery', 'dine-in'] }, location: string,
+    reservationNumber: string, alreadySeated: { type: 'boolean' },
   }, ['fulfillment']],
   ['placeOrder', 'Submit the current quote after the customer explicitly agrees to the read-back.', {
     quoteId: string,
   }, ['quoteId']],
-  ['findTables', 'Find seating by Boston date (YYYY-MM-DD), requested time (HH:mm), and party size. Once the caller chooses a time, look up that exact time to get the proposal ID.', {
+  ['findTables', 'Find seating by Boston date (YYYY-MM-DD), requested time (HH:mm or now), and party size. Once the caller chooses a time, look up that exact time to get the proposal ID.', {
     date: string, time: string, partySize: integer,
   }, ['date', 'partySize']],
-  ['reserveTable', 'Book the proposed seating after the customer explicitly agrees to the read-back.', {
+  ['reserveTable', 'Book a table only after the customer explicitly agrees in a later turn to the available time and party size you read back. A request to check availability calls findTables.', {
     proposalId: string,
   }, ['proposalId']],
 ];

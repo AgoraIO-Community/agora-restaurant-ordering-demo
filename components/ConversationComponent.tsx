@@ -105,7 +105,7 @@ export default function ConversationComponent({
   ending = false,
   sessionTimeRemaining = 600,
   startupError,
-  feedback,
+  restaurantReadToken,
   onActivityChange,
   onInspectionChange,
 }: ConversationComponentProps) {
@@ -685,7 +685,6 @@ export default function ConversationComponent({
 
   return (
     <QuickstartConversationLayout
-      feedback={feedback}
       statusPanel={
         <div className="demo-session-meta">
           <span
@@ -722,6 +721,7 @@ export default function ConversationComponent({
             currentInProgressMessage={currentInProgressMessage}
             agentUID={agentUID}
             state={voiceState}
+            restaurantReadToken={restaurantReadToken}
             hidden={!conversationOpen}
           />
           {!conversationOpen ? (

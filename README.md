@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
-Order from a sample menu or reserve a table at the fictional North Pier Pizza in Boston.
+Order for dine-in, pickup, or delivery, or reserve a table at the fictional North Pier Pizza in Boston.
 
 **[Try the live demo →](https://agora-restaurant-ordering-demo.vercel.app/)**
 
@@ -104,7 +104,7 @@ The maintained Community demo uses GitHub Actions for production deployment afte
 1. Choose **Talk to the order desk** and allow microphone access.
 2. Say “I would like two Garden Pizzas for delivery.”
 3. Then say “Change that to one Garden Pizza and make it pickup.”
-4. Ask for a recap and check that the spoken draft reflects the change.
+4. Confirm the revised order when business tools are configured. Try saying “A table for four tomorrow at 6:30 p.m.” to check seating.
 
 ### Architecture
 
@@ -134,7 +134,7 @@ Explore the sample menu and choose dishes and quantities. Choose a dining option
 
 ### What remains simulated?
 
-The demo cannot place an order, take payment, check delivery coverage or guarantee allergen safety. Use fictional details and omit contact or payment information. The demo does not calculate a final total or send the draft to a kitchen.
+With business tools configured, the demo calculates totals, checks simulated delivery coverage, and records demo orders and reservations. Use the sample locations and leave out contact and payment information. Ingredient guidance uses the sample menu.
 
 ### Why can’t I start a voice session?
 

@@ -12,8 +12,25 @@ export function normalizeTranscriptSpacing(text: string): string {
   return text
     .replace(/([.!?])([A-Za-z])/g, '$1 $2')
     .replace(/,([A-Za-z])/g, ', $1')
-    .replace(/\s{2,}/g, ' ')
+    .replace(/[ \t]{2,}/g, ' ')
     .trim();
+}
+
+export function formatAssistantTranscript(text: string): string {
+  // Some streaming transcripts lose the line breaks before numbered Markdown items.
+  const formatted = text
+    .replace(/(?:^|\n)?[ \t]*([1-9]\.[ \t]*\*\*[^*\n]+\*\*)/g, '\n$1')
+    .replace(/\*\*([^*\n]+)\*\*[ \t]*-[ \t]*/g, '$1 — ')
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+    .replace(/([:)]|\$\d+\.\d{2})[ \t]*-[ \t]+(?!(?:Small|Medium|Large|Regular|Toppings|Ingredients):)(?=[A-Z][A-Za-z ]{1,35}:)/g, '$1\n• ')
+    .replace(/(?<=[a-z:])-[ \t]+(?=[A-Z][a-z])/g, '\n• ')
+    .trim();
+  if (!/^(?:[1-9]\. |• )/m.test(formatted)) return formatted;
+
+  return formatted
+    .replace(/(\$\d+\.\d{2})[ \t]*-[ \t]*(?=[A-Za-z])/g, '$1 · ')
+    .replace(/(\$\d+\.\d{2})(?=[A-Z])/g, '$1. ')
+    .replace(/(?<=[a-z])(?=(?:For sides|For drinks|We also|Would you|Please note)\b)/g, '\n\n');
 }
 
 // Agora timestamps vary by source: some RTM payloads use Unix-seconds while

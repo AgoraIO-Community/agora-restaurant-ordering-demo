@@ -4,8 +4,8 @@ export type { ScenarioPresentation } from '@/types/presentation';
 export const presentation: ScenarioPresentation = {
   "id": "restaurant-ordering",
   "name": "Restaurant Ordering & Reservations",
-  "purpose": "Order pizza for pickup or delivery, or book a table.",
-  "summary": "Order pizza for pickup or delivery, or book a table.",
+  "purpose": "Order pizza for dine-in, pickup, or delivery, or book a table.",
+  "summary": "Order pizza for dine-in, pickup, or delivery, or book a table.",
   "featuresHeading": "In this conversation",
   "features": [
     {

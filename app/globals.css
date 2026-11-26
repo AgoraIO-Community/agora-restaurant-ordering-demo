@@ -1021,9 +1021,3 @@ button:disabled {
 .restaurant-totals dd { margin: 0; }
 .restaurant-total, .restaurant-estimate { font-weight: 600; }
 .restaurant-slots li { padding: 5px 0; font-size: .875rem; }
-
-.demo-session:not(.demo-session-ended) .demo-session-feedback:has(.restaurant-details) {
-  flex-shrink: 0;
-  max-height: min(56%, 360px);
-  overflow-y: auto;
-}

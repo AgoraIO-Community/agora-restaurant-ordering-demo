@@ -2,6 +2,7 @@ import { getConversationContext } from '../lib/prompt-context';
 import assert from 'node:assert/strict';
 import { getScenarioConfig, getScenarioPrompt } from '../lib/agent-config';
 import { getScenarioPresentation } from '../lib/presentation';
+import { formatAssistantTranscript, normalizeTranscriptSpacing } from '../lib/conversation';
 const config = getScenarioConfig();
 assert.equal(config.id, "restaurant-ordering");
 assert.equal(getScenarioPresentation().id, config.id);
@@ -11,6 +12,14 @@ assert.match(getScenarioPrompt(), /# First-version boundary/);
 assert.match(getScenarioPrompt(), /No business data lookup/);
 assert.doesNotMatch(getScenarioPrompt(), /AG-100[123]|patient-alex|AST-R3001|travelerKey|participantId/);
 console.log('Scenario conversation contract passed: ' + config.id);
+const menuTranscript = "Here's our menu:1. **Garden Pizza**- Medium: $16.00- Large: $20.002. **Garlic Knots**- Regular: $6.00Please let me know.";
+assert.equal(formatAssistantTranscript(normalizeTranscriptSpacing(menuTranscript)),
+  "Here's our menu:\n1. Garden Pizza — Medium: $16.00 · Large: $20.00\n2. Garlic Knots — Regular: $6.00. Please let me know.");
+assert.equal(normalizeTranscriptSpacing('First line.\n\nSecond  line.'), 'First line.\n\nSecond line.');
+assert.equal(formatAssistantTranscript("Our menu includes:- Garden Pizza: Medium $16.00 (mushrooms)- Garlic Knots: Regular $6.00We also have drinks."),
+  "Our menu includes:\n• Garden Pizza: Medium $16.00 (mushrooms)\n• Garlic Knots: Regular $6.00. We also have drinks.");
+assert.equal(formatAssistantTranscript('We have:- Garden Pizza- Margherita Pizza- Pepperoni PizzaFor sides, we offer Garlic Knots.'),
+  'We have:\n• Garden Pizza\n• Margherita Pizza\n• Pepperoni Pizza\n\nFor sides, we offer Garlic Knots.');
 
 // Calendar regressions: U.S. dates can differ from UTC and offsets change with DST.
 const localNight = getConversationContext('America/New_York', new Date('2026-11-05T02:30:00Z'));

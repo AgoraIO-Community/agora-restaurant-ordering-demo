@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { AgentSignalSnapshot } from '@/lib/agent-signal';
 import type { InspectionSnapshot } from '@/lib/inspection';
 import type { RTMClient } from 'agora-rtm';
@@ -41,7 +40,7 @@ export interface ConversationComponentProps {
   onEndConversation: () => void | Promise<void>;
   onBuild: import('react').MouseEventHandler<HTMLButtonElement>;
   startupError?: string;
-  feedback?: ReactNode;
+  restaurantReadToken?: string | null;
   onActivityChange?: (snapshot: AgentSignalSnapshot) => void;
   onInspectionChange?: (snapshot: InspectionSnapshot) => void;
 }

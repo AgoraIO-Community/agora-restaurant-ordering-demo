@@ -1,6 +1,6 @@
 import type { RestaurantRoute } from './routes';
 
-export type Fulfillment = 'pickup' | 'delivery';
+export type Fulfillment = 'pickup' | 'delivery' | 'dine-in';
 
 export interface CartLine {
   itemId: string;
@@ -20,15 +20,21 @@ export interface OrderQuote {
   taxCents: number;
   deliveryFeeCents: number;
   totalCents: number;
-  prepMinutes: number;
-  estimateMinutes: number;
-  estimatedAt: string;
+  prepMinutes?: number;
+  estimateMinutes?: number;
+  estimatedAt?: string;
+  estimatedTimeLabel?: string;
+  reservationNumber?: string;
+  seatingTime?: string;
+  immediateSeating?: boolean;
   scheduledPrepAt?: string;
+  scheduledPrepTimeLabel?: string;
   expiresAt: number;
   route?: RestaurantRoute;
 }
 
 export interface RestaurantOrder {
+  confirmedAt: number;
   number: string;
   quote: OrderQuote;
 }
@@ -39,10 +45,12 @@ export interface TableOption {
 }
 
 export interface TableProposal extends TableOption {
+  immediate?: boolean;
   id: string;
 }
 
 export interface TableReservation {
+  confirmedAt: number;
   number: string;
   slot: TableProposal;
 }

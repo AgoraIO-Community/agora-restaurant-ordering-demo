@@ -1,6 +1,6 @@
 'use client';
 
-import { ConversationPanel } from './agent-ui/conversation-panel';
+import { RestaurantTranscript } from './RestaurantReceipt';
 import type { VoiceState } from './status';
 import { getScenarioPresentation } from '@/lib/presentation';
 
@@ -16,6 +16,7 @@ type Props = {
   agentUID: string;
   state?: VoiceState;
   hidden?: boolean;
+  restaurantReadToken?: string | null;
 };
 
 export function QuickstartTranscriptPanel({
@@ -24,12 +25,15 @@ export function QuickstartTranscriptPanel({
   agentUID,
   state = 'ready',
   hidden,
+  restaurantReadToken,
 }: Props) {
   const messages = currentInProgressMessage
     ? [...messageList, currentInProgressMessage]
     : messageList;
   return (
-    <ConversationPanel
+    <RestaurantTranscript
+      token={restaurantReadToken}
+      active
       id="scenario-transcript"
       name={getScenarioPresentation().name}
       pending={!!currentInProgressMessage}

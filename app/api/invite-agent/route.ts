@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
             mode: 'vad',
             vad_config: {
               interrupt_duration_ms: 160, // ms of speech before interruption triggers
+              speaking_interrupt_duration_ms: 320, // Require longer speech while the agent is speaking.
               prefix_padding_ms: 300, // audio captured before speech is detected
             },
           },

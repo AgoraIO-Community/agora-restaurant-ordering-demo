@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/message-scroller';
 
 import type { VoiceState } from '@/components/status';
+import { formatAssistantTranscript } from '@/lib/conversation';
 import { cn } from '@/lib/utils';
 
 export interface TranscriptMessage {
@@ -37,11 +38,21 @@ export interface ConversationPanelProps {
   voiceState?: VoiceState;
   hidden?: boolean;
   className?: string;
-  agentRun?: {
-    afterMessageId: string;
-    content: ReactNode;
-  };
+  attachments?: TranscriptAttachment[];
 }
+
+export interface TranscriptAttachment {
+  id: string;
+  afterMessageId?: string;
+  content: ReactNode;
+}
+
+const emptyTranscriptCopy: Partial<Record<VoiceState, string>> = {
+  connecting: 'Connecting…',
+  ended: 'No transcript was recorded.',
+  error: 'Transcript unavailable.',
+};
+
 function TranscriptScrollRestoration({
   hidden,
   messages,
@@ -64,33 +75,20 @@ function TranscriptScrollRestoration({
 
 export function ConversationPanel({
   id,
-  name = 'IT Support Assistant',
+  name = 'Assistant',
   messages,
   pending,
   voiceState = 'ready',
   hidden,
   className,
-  agentRun,
+  attachments = [],
 }: ConversationPanelProps) {
   // Layout changes may move scrollTop; only user input should pause following.
   const following = useRef(true);
   const userScrolling = useRef(false);
-  const displayedMessages: TranscriptMessage[] =
-    messages.length === 0 && !agentRun
-      ? [
-          {
-            id: 'conversation-placeholder',
-            role: 'agent',
-            text:
-              voiceState === 'connecting'
-                ? 'Connecting…'
-                : 'Describe your IT issue to get started.',
-          },
-        ]
-      : messages;
-  const agentRunAnchorFound = agentRun
-    ? messages.some((message) => message.id === agentRun.afterMessageId)
-    : false;
+  const unanchored = attachments.filter(attachment =>
+    !messages.some(message => message.id === attachment.afterMessageId),
+  );
   return (
     <section
       id={id}
@@ -102,7 +100,7 @@ export function ConversationPanel({
     >
       <div className="ag-transcript">
         <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-          <TranscriptScrollRestoration hidden={hidden} messages={displayedMessages} following={following} />
+          <TranscriptScrollRestoration hidden={hidden} messages={messages} following={following} />
           <MessageScroller>
             <MessageScrollerViewport
               role="log"
@@ -134,7 +132,12 @@ export function ConversationPanel({
               }}
             >
               <MessageScrollerContent>
-                {displayedMessages.map((message) => (
+                {messages.length === 0 && attachments.length === 0 ? (
+                  <p className="px-3 py-2 text-sm text-muted-foreground">
+                    {emptyTranscriptCopy[voiceState] ?? 'The transcript will appear here.'}
+                  </p>
+                ) : null}
+                {messages.map((message) => (
                   <Fragment key={message.id}>
                     <MessageScrollerItem messageId={message.id}>
                       <Message
@@ -166,25 +169,25 @@ export function ConversationPanel({
                             }
                             align={message.role === 'user' ? 'end' : 'start'}
                           >
-                            <BubbleContent>{message.text}</BubbleContent>
+                            <BubbleContent>
+                              {message.role === 'agent' ? formatAssistantTranscript(message.text) : message.text}
+                            </BubbleContent>
                           </Bubble>
                         </MessageContent>
                       </Message>
                     </MessageScrollerItem>
-                    {agentRun?.afterMessageId === message.id ? (
-                      <MessageScrollerItem
-                        messageId={`${message.id}-agent-run`}
-                      >
-                        {agentRun.content}
+                    {attachments.filter(attachment => attachment.afterMessageId === message.id).map(attachment => (
+                      <MessageScrollerItem key={attachment.id} messageId={attachment.id}>
+                        {attachment.content}
                       </MessageScrollerItem>
-                    ) : null}
+                    ))}
                   </Fragment>
                 ))}
-                {agentRun && !agentRunAnchorFound ? (
-                  <MessageScrollerItem messageId="unanchored-agent-run">
-                    {agentRun.content}
+                {unanchored.map(attachment => (
+                  <MessageScrollerItem key={attachment.id} messageId={attachment.id}>
+                    {attachment.content}
                   </MessageScrollerItem>
-                ) : null}
+                ))}
               </MessageScrollerContent>
             </MessageScrollerViewport>
             <MessageScrollerButton behavior="auto" onClick={() => {

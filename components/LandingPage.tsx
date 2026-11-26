@@ -6,12 +6,11 @@ import type { AgentSignalSnapshot } from '@/lib/agent-signal';
 import { ScenarioIdentity } from './ScenarioIdentity';
 import { Dialog } from './ui/dialog';
 import { ScenarioFaq } from './ScenarioFaq';
-import { RestaurantReceipt } from './RestaurantReceipt';
+import { RestaurantTranscript } from './RestaurantReceipt';
 import { ConversationWorkspace } from './ConversationWorkspace';
 import { QuickstartPreCallCard } from './QuickstartPreCallCard';
 import { ScenarioInspector } from './ScenarioInspector';
 import { DeveloperGuide } from './DeveloperGuide';
-import { ConversationPanel } from './agent-ui/conversation-panel';
 import { Button } from './ui/button';
 
 import { useState, useRef, Suspense, useEffect, useCallback } from 'react';
@@ -284,14 +283,14 @@ export default function LandingPage() {
   return (
     <ScenarioShell ui={ui} active={showConversation} loading={isLoading} error={error} disabled={false} onStart={handleStartConversation} endedByTimeout={endedByTimeout}
       onBuild={openBuild} buildOpen={buildOpen} onBuildOpenChange={setBuildOpen} onCloseBuildAutoFocus={restoreBuildFocus}
-      sessionResult={!showConversation && restaurantReadToken ? <RestaurantReceipt token={restaurantReadToken} active={false} /> : undefined}
+      restaurantReadToken={restaurantReadToken}
     >
       {agentJoinError && <p role="alert">The assistant could not connect. End this session and try again.</p>}
       {error && <p className="demo-workspace-fallback" role="alert">{error}</p>}
       {showConversation && agoraData && rtmClient && <Suspense fallback={<LoadingSkeleton />}><ErrorBoundary><AgoraProvider>
         <ConversationComponent agoraData={agoraData} rtmClient={rtmClient} onTokenWillExpire={handleTokenWillExpire} onEndConversation={handleEndConversation}
           onBuild={openBuild}
-          feedback={restaurantReadToken ? <RestaurantReceipt token={restaurantReadToken} active /> : undefined}
+          restaurantReadToken={restaurantReadToken}
           onActivityChange={ui.setActivity} onInspectionChange={ui.setInspection} ending={ending} sessionTimeRemaining={sessionTimeRemaining}
           startupError={agentJoinError ? "The assistant could not connect. End this session and try again." : undefined} />
       </AgoraProvider></ErrorBoundary></Suspense>}
@@ -318,7 +317,7 @@ function useScenarioUi() {
 
 type ScenarioUi = ReturnType<typeof useScenarioUi>;
 
-function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, onBuild, buildOpen, onBuildOpenChange, onCloseBuildAutoFocus, children, sessionResult, endedByTimeout = false }: {
+function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, onBuild, buildOpen, onBuildOpenChange, onCloseBuildAutoFocus, children, restaurantReadToken, endedByTimeout = false }: {
   ui: ScenarioUi;
   active: boolean;
   loading: boolean;
@@ -330,7 +329,7 @@ function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, 
   onBuildOpenChange: (open: boolean) => void;
   onCloseBuildAutoFocus: (event: Event) => void;
   children: ReactNode;
-  sessionResult?: ReactNode;
+  restaurantReadToken?: string | null;
   endedByTimeout?: boolean;
 }) {
   const scenario = getScenarioPresentation();
@@ -360,8 +359,7 @@ function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, 
                 )}
               </div>
             </div>
-            <div className="demo-session-feedback">{sessionResult}</div>
-            <ConversationPanel id="last-session-transcript" name={scenario.name} messages={inspection.messages} pending={false} voiceState="ended" className="demo-conversation" />
+            <RestaurantTranscript token={restaurantReadToken} active={false} id="last-session-transcript" name={scenario.name} messages={inspection.messages} pending={false} voiceState="ended" className="demo-conversation" />
             <div className="demo-ended-actions">
               <Button variant="outline" disabled={disabled || loading} onClick={onStart}>Start again</Button>
               <Button onClick={onBuild}>Build Now</Button>

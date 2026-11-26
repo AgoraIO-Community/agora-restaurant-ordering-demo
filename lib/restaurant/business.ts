@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { SCENARIO_KNOWLEDGE as restaurant } from '../scenario-knowledge';
 import { restaurantRouteProvider } from './routes';
 import { bookTable, isTableBooked, sessionForToken, updateRestaurantSession } from './store';
-import type { CartLine, Fulfillment, RestaurantState, TableOption } from './types';
+import type { CartLine, RestaurantState, TableOption } from './types';
 
 export class RestaurantProblem extends Error {
   constructor(readonly code: string, message: string) { super(message); }
@@ -20,6 +20,11 @@ const localFormatter = new Intl.DateTimeFormat('sv-SE', {
 const bostonOffset = new Intl.DateTimeFormat('en-US', {
   timeZone: restaurant.timeZone,
   timeZoneName: 'longOffset',
+});
+const bostonDateTime = new Intl.DateTimeFormat('en-US', {
+  timeZone: restaurant.timeZone,
+  dateStyle: 'medium',
+  timeStyle: 'short',
 });
 const quoteLifetime = 3 * 60 * 1000;
 const deliveryRadiusMiles = 3;
@@ -113,8 +118,8 @@ function kitchenTiming(now: number, pizzas: number) {
 
 async function quoteOrder(token: string, args: Args) {
   const fulfillment = args.fulfillment;
-  if (fulfillment !== 'pickup' && fulfillment !== 'delivery') {
-    throw new RestaurantProblem('invalid_input', 'Ask whether the order is for pickup or delivery.');
+  if (fulfillment !== 'pickup' && fulfillment !== 'delivery' && fulfillment !== 'dine-in') {
+    throw new RestaurantProblem('invalid_input', 'Ask whether the order is for dine-in, pickup, or delivery.');
   }
 
   const revision = requireUpdate(token, state => {
@@ -134,6 +139,12 @@ async function quoteOrder(token: string, args: Args) {
     }
     const now = Date.now();
     const pizzas = state.cart.reduce((total, item) => total + (item.size === 'regular' ? 0 : item.quantity), 0);
+    const reservation = fulfillment === 'dine-in' && typeof args.reservationNumber === 'string'
+      ? state.reservations.find(entry => entry.number === args.reservationNumber)
+      : undefined;
+    if (fulfillment === 'dine-in' && (args.reservationNumber ? !reservation : args.alreadySeated !== true)) {
+      throw new RestaurantProblem('seating_required', 'Confirm the caller already has a table or reserve one before quoting a dine-in order.');
+    }
     const { startsAt, prepMinutes } = kitchenTiming(now, pizzas);
     const estimatedAt = startsAt + (prepMinutes + (route ? 5 + route.minutes : 0)) * 60_000;
     const estimateMinutes = Math.ceil((estimatedAt - now) / 60_000);
@@ -142,10 +153,21 @@ async function quoteOrder(token: string, args: Args) {
     const deliveryFeeCents = route ? 399 : 0;
     state.quote = {
       id: randomBytes(12).toString('hex'),
-      items: state.cart, fulfillment: fulfillment as Fulfillment,
+      items: state.cart, fulfillment,
       subtotalCents, taxCents, deliveryFeeCents, totalCents: subtotalCents + taxCents + deliveryFeeCents,
-      prepMinutes, estimateMinutes, estimatedAt: new Date(estimatedAt).toISOString(),
-      ...(startsAt > now ? { scheduledPrepAt: new Date(startsAt).toISOString() } : {}),
+      ...(fulfillment === 'dine-in' ? {} : {
+        prepMinutes, estimateMinutes, estimatedAt: new Date(estimatedAt).toISOString(),
+        estimatedTimeLabel: bostonDateTime.format(new Date(estimatedAt)) + ' Boston time',
+        ...(startsAt > now ? {
+          scheduledPrepAt: new Date(startsAt).toISOString(),
+          scheduledPrepTimeLabel: bostonDateTime.format(new Date(startsAt)) + ' Boston time',
+        } : {}),
+      }),
+      ...(reservation ? {
+        reservationNumber: reservation.number,
+        seatingTime: reservation.slot.startsAt,
+        immediateSeating: reservation.slot.immediate,
+      } : {}),
       expiresAt: now + quoteLifetime, ...(route ? { route } : {}),
     };
     return { quote: state.quote, revision: state.revision, currency: restaurant.currency, timeZone: restaurant.timeZone };
@@ -154,6 +176,16 @@ async function quoteOrder(token: string, args: Args) {
 
 function tableFor(slot: TableOption) {
   return tables.find(table => table.seats >= slot.partySize && !isTableBooked(slot.startsAt, table.id));
+}
+
+function minuteOfDay(time: string) {
+  return Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
+}
+
+function currentSeating(localNow: string) {
+  const minute = minuteOfDay(localNow.slice(11));
+  if (minute < 11 * 60 || minute >= 22 * 60) return undefined;
+  return seatings.findLast(seating => minuteOfDay(seating) <= minute);
 }
 
 function findTables(token: string, args: Args) {
@@ -165,26 +197,30 @@ function findTables(token: string, args: Args) {
   const date = text(args.date, 'local date');
   const partySize = quantity(args.partySize, 'Party size', 6);
   const time = args.time == null ? undefined : text(args.time, 'local time');
-  const now = localFormatter.format(new Date()).replace(' ', 'T');
+  const now = localFormatter.format(new Date(Date.now())).replace(' ', 'T');
   const lastDate = localFormatter.format(new Date(Date.now() + 28 * 86_400_000)).slice(0, 10);
   const parsed = new Date(date + 'T12:00:00Z');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(+parsed) ||
     parsed.toISOString().slice(0, 10) !== date || date < now.slice(0, 10) || date > lastDate) {
     throw new RestaurantProblem('invalid_date', 'Choose a Boston date within the next 28 days.');
   }
-  if (time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+  if (time && time !== 'now' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
     throw new RestaurantProblem('invalid_time', 'Provide a local time as HH:mm.');
   }
 
   return requireUpdate(token, state => {
-    const minuteOfDay = (value: string) => Number(value.slice(0, 2)) * 60 + Number(value.slice(3, 5));
-    const byPreference = time ? [...seatings].sort((a, b) =>
+    const immediate = time === 'now' && date === now.slice(0, 10);
+    const current = immediate ? currentSeating(now) : undefined;
+    const byPreference = time && time !== 'now' ? [...seatings].sort((a, b) =>
       Math.abs(minuteOfDay(a) - minuteOfDay(time)) - Math.abs(minuteOfDay(b) - minuteOfDay(time))) : seatings;
     const slots = byPreference.map(seating => ({ startsAt: date + 'T' + seating, partySize }))
       .filter(slot => slot.startsAt > now && tableFor(slot));
-    const requested = time && slots.find(slot => slot.startsAt === date + 'T' + time);
+    const walkIn = current ? { startsAt: date + 'T' + current, partySize } : undefined;
+    const requested = walkIn && tableFor(walkIn) ? walkIn : slots.find(slot => slot.startsAt === date + 'T' + time);
     state.tableOptions = slots.slice(0, 3);
-    state.tableProposal = requested ? { ...requested, id: randomBytes(12).toString('hex') } : undefined;
+    state.tableProposal = requested
+      ? { ...requested, id: randomBytes(12).toString('hex'), ...(requested === walkIn ? { immediate: true } : {}) }
+      : undefined;
     return { options: state.tableOptions, proposal: state.tableProposal, timeZone: restaurant.timeZone };
   });
 }
@@ -223,7 +259,7 @@ export async function runRestaurantTool(token: string, tool: string, args: Args)
         if (!latest.quote || latest.quote.id !== quoteId || latest.quote.expiresAt <= Date.now()) {
           throw new RestaurantProblem('stale_quote', 'Request and read back a new quote before confirming.');
         }
-        const order = { number: 'NP-' + randomBytes(5).toString('hex').toUpperCase(), quote: latest.quote };
+        const order = { number: 'NP-' + randomBytes(5).toString('hex').toUpperCase(), quote: latest.quote, confirmedAt: Date.now() };
         latest.orders.push(order);
         latest.cart = [];
         latest.quote = undefined;
@@ -239,12 +275,15 @@ export async function runRestaurantTool(token: string, tool: string, args: Args)
         const repeat = latest.reservations.find(reservation => reservation.slot.id === proposalId);
         if (repeat) return { reservation: repeat };
         const slot = latest.tableProposal;
-        if (!slot || slot.id !== proposalId || slot.startsAt <= localFormatter.format(new Date()).replace(' ', 'T')) {
+        const now = localFormatter.format(new Date(Date.now())).replace(' ', 'T');
+        const currentSlot = now.slice(0, 10) + 'T' + currentSeating(now);
+        const validSlot = slot && (slot.immediate ? slot.startsAt === currentSlot : slot.startsAt > now);
+        if (!slot || slot.id !== proposalId || !validSlot) {
           throw new RestaurantProblem('stale_proposal', 'Look up and confirm an available seating time.');
         }
         const table = tableFor(slot);
         if (!table) throw new RestaurantProblem('table_unavailable', 'That seating just filled. Look up alternatives.');
-        const reservation = { number: 'NPT-' + randomBytes(5).toString('hex').toUpperCase(), slot };
+        const reservation = { number: 'NPT-' + randomBytes(5).toString('hex').toUpperCase(), slot, confirmedAt: Date.now() };
         // Selection and booking run synchronously in the same process.
         bookTable(slot.startsAt, table.id);
         latest.reservations.push(reservation);

@@ -2,7 +2,7 @@
 
 ## 1. What you build
 
-Order from a sample pizza menu for pickup or delivery, or reserve a table.
+Order from a sample pizza menu for dine-in, pickup, or delivery, or reserve a table.
 
 ## 2. Prerequisites
 
