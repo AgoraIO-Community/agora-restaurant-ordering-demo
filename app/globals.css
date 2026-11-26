@@ -962,13 +962,7 @@ button:disabled {
   }
 }
 
-/* Scenario-owned business views share the same theme and page gutters. */
-.demo-business { padding: 0 48px 48px; max-width: 1600px; margin: 0 auto; }
-.demo-business:empty { display: none; }
-.demo-business h2 { font-size: 22px; line-height: 1.4; }
-.demo-business button, .demo-business input, .demo-business select { max-width: 100%; }
 .demo-session-ended { margin-bottom: 32px; }
-@media (max-width: 800px) { .demo-business { padding: 0 20px 32px; } }
 
 @media (max-width: 480px) {
   .demo-header {
@@ -981,4 +975,55 @@ button:disabled {
     margin-left: auto;
     gap: 4px;
   }
+}
+
+.restaurant-details {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+.restaurant-card {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+}
+.restaurant-card summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 16px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: .875rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.restaurant-card summary::-webkit-details-marker { display: none; }
+.restaurant-card summary:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+  border-radius: 9px;
+}
+.restaurant-card summary svg {
+  color: var(--muted-foreground);
+}
+.restaurant-card[open] summary svg { transform: rotate(180deg); }
+.restaurant-card-body { padding: 0 12px 12px; }
+.restaurant-card-body p { margin: 5px 0; font-size: .875rem; overflow-wrap: anywhere; }
+.restaurant-muted { color: var(--muted-foreground); font-size: .875rem; }
+.restaurant-reference { font-size: .8125rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.restaurant-lines, .restaurant-slots { margin: 0; padding: 0; list-style: none; }
+.restaurant-lines li, .restaurant-totals div { display: flex; justify-content: space-between; gap: 12px; }
+.restaurant-lines li { padding: 7px 0; font-size: .875rem; border-bottom: 1px solid var(--border); }
+.restaurant-lines li small { color: var(--muted-foreground); display: block; }
+.restaurant-totals { margin: 7px 0; font-size: .875rem; }
+.restaurant-totals dd { margin: 0; }
+.restaurant-total, .restaurant-estimate { font-weight: 600; }
+.restaurant-slots li { padding: 5px 0; font-size: .875rem; }
+
+.demo-session:not(.demo-session-ended) .demo-session-feedback:has(.restaurant-details) {
+  flex-shrink: 0;
+  max-height: min(56%, 360px);
+  overflow-y: auto;
 }

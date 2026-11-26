@@ -3,6 +3,7 @@ import { AgoraClient, Area } from 'agora-agents';
 import { ConvoAITokenBuilder } from 'agora-token';
 import { TOKEN_LIFETIME_SECONDS } from '@/lib/agora';
 import { StopConversationRequest } from '@/types/conversation';
+import { revokeRestaurantToolsForAgent } from '@/lib/restaurant/store';
 
 function isAgentAlreadyStoppingOrStopped(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
@@ -59,11 +60,13 @@ export async function POST(request: Request) {
     } catch (error) {
       if (isAgentAlreadyStoppingOrStopped(error)) {
         // Treat stop as idempotent: agent is already exiting (or gone).
+        revokeRestaurantToolsForAgent(agent_id);
         return NextResponse.json({ success: true, state: 'already-stopping' });
       }
       throw error;
     }
 
+    revokeRestaurantToolsForAgent(agent_id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error stopping conversation:', error);

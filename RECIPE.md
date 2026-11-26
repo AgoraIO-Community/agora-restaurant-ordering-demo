@@ -1,8 +1,8 @@
-# Agora Takeout & Delivery Ordering Demo
+# Agora Restaurant Ordering & Reservations Demo
 
 ## 1. What you build
 
-Explore a sample menu and build a pickup or delivery order draft.
+Order from a sample pizza menu for pickup or delivery, or reserve a table.
 
 ## 2. Prerequisites
 
@@ -10,7 +10,7 @@ Use Node.js 24, pnpm 9.15.9 and an Agora project with Conversational AI enabled.
 
 ## 3. Configure the app
 
-Copy `env.local.example` to `.env.local`. Enter the App ID and App Certificate in the fields listed in [README.md](README.md).
+Copy `env.local.example` to `.env.local`. Enter the App ID, App Certificate, and public HTTPS tool origin as described in [README.md](README.md).
 
 ## 4. Run the app
 
@@ -18,11 +18,11 @@ Run `pnpm install --frozen-lockfile` and `pnpm dev`. Open the local page and all
 
 ## 5. Try a conversation
 
-Say “I would like two Garden Pizzas for delivery.” Then say “Change that to one Garden Pizza and make it pickup.” Ask for a recap of the corrected draft.
+Ask for a large Garden Pizza delivered to Copley Square, then switch to pickup and confirm the new quote. Also try booking a table for four tomorrow at 6:30 p.m.
 
 ## 6. Understand the boundary
 
-The browser session uses fictional reference data and a spoken draft. Do not collect a delivery address, phone number or payment details. Do not quote an all-in total, claim delivery coverage or promise allergen safety. Do not claim an order was submitted, paid for or sent to the kitchen.
+Orders, table reservations, and routes use demo data. Use a sample Boston landmark for delivery. Keep the exercise free of payment details and personal contact information.
 
 ## 7. Customize the scenario
 

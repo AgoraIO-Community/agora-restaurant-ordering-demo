@@ -23,6 +23,7 @@ export interface StopConversationRequest {
 export interface AgentResponse {
   agent_id: string;
   create_ts: number;
+  restaurant_read_token?: string;
   state: string;
 }
 

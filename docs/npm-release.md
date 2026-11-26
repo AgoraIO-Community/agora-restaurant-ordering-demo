@@ -17,7 +17,7 @@ Only allowlisted source files are included. The application template contains ru
 
 The generated `package.json` omits `npm:build` and `npm:test`, and its CI omits the upstream scaffold test step. Other application scripts and application verification remain unchanged. Maintainer links in generated documentation point to the upstream GitHub document. Tests verify the excluded files and scripts, retained workflows, generated-document links and checksums of the final template bytes.
 
-Real environment files, dependencies, caches and local evidence are excluded. Dot-prefixed template paths are encoded during packaging and restored on creation. The package includes source revision metadata and file checksums. A local build includes changes to tracked source files and is marked dirty when the checkout has changes; newly untracked files are not included. Release builds require a clean checkout.
+Real environment files, dependencies, caches and local evidence are excluded. Dot-prefixed template paths are encoded during packaging and restored on creation. The package includes source revision metadata and file checksums. A local build includes changes to tracked source files and the explicitly listed restaurant sources. The manifest is marked dirty when the checkout has changes. Release builds require a clean checkout.
 
 ## One-time npm setup
 

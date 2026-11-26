@@ -32,6 +32,18 @@ try {
   assert.equal(packageManifest.private, undefined);
   assert.equal(packageManifest.version, pkg.version);
   const bundledPaths = manifest.files.map(file => file.path);
+  for (const file of [
+    'app/api/restaurant/state/route.ts',
+    'app/api/restaurant/tools/route.ts',
+    'components/RestaurantReceipt.tsx',
+    'lib/restaurant/business.ts',
+    'lib/restaurant/routes.ts',
+    'lib/restaurant/store.ts',
+    'lib/restaurant/types.ts',
+    'scripts/verify-restaurant.ts',
+  ]) {
+    assert.ok(bundledPaths.includes(file), 'Missing restaurant source ' + file);
+  }
   assert.deepEqual(bundledPaths.filter(file => file.startsWith('.github/workflows/')).sort(), ['.github/workflows/ci.yml', '.github/workflows/docker.yml']);
   assert.ok(!bundledPaths.some(file => file.startsWith('scripts/npm/') || file === 'docs/npm-release.md'), 'Do not bundle upstream release tooling or maintainer-only documentation.');
   for (const file of manifest.files) {

@@ -1,8 +1,8 @@
-# Agora Takeout & Delivery Ordering Demo
+# Agora Restaurant Ordering & Reservations Demo
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
-Explore a sample menu and build a pickup or delivery order draft. This browser demo uses Agora Conversational AI and fictional reference material. Its output is a spoken draft for the current conversation.
+Order from a sample menu or reserve a table at the fictional North Pier Pizza in Boston.
 
 **[Try the live demo →](https://agora-restaurant-ordering-demo.vercel.app/)**
 
@@ -22,8 +22,8 @@ Explore a sample menu and build a pickup or delivery order draft. This browser d
 ## Features
 
 - Explore the sample menu and choose dishes and quantities.
-- Choose pickup or delivery and revise the order during the conversation.
-- Hear a spoken recap of the revised order draft.
+- Choose a dining option and revise the order during the conversation.
+- Review and confirm simulated orders or table reservations when business tools are configured.
 
 ## Tech Stack
 
@@ -74,7 +74,7 @@ NEXT_AGORA_APP_CERTIFICATE=your_agora_app_certificate
 
 You don’t need separate API keys for the default speech and language models. Put the App Certificate in `.env.local` and never expose it in browser code.
 
-See [env.local.example](env.local.example) for the configuration template.
+Set `RESTAURANT_TOOL_ORIGIN` to a public HTTPS origin that reaches the same Next.js process for business tool callbacks. The default configuration supports menu questions and spoken drafts. See [env.local.example](env.local.example) for the configuration template.
 
 **2. Start the app**
 
@@ -118,7 +118,7 @@ flowchart TB
   Reference[Bundled scenario reference] -->|Prompt context| Server
 ```
 
-Next.js issues browser tokens and supplies the scenario instructions when starting the Agora Agent. Conversation behavior is prompt-driven; no live business system is connected. See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
+Next.js issues browser tokens and supplies the scenario instructions when starting the Agora Agent. Business tools use simulated data and keep state in process memory. See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 
 <a id="faq-and-limitations"></a>
 
@@ -130,7 +130,7 @@ I would like two Garden Pizzas for delivery.
 
 ### What is available?
 
-Explore the sample menu and choose dishes and quantities. Choose pickup or delivery and revise the order during the conversation. Hear a spoken recap of the revised order draft.
+Explore the sample menu and choose dishes and quantities. Choose a dining option and revise the order during the conversation. Review and confirm simulated orders or table reservations when business tools are configured.
 
 ### What remains simulated?
 

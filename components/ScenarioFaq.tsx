@@ -19,15 +19,15 @@ const questions = [
   },
   {
     "question": "What should I say?",
-    "answer": "I would like two Garden Pizzas for delivery."
+    "answer": "I'd like a large Garden Pizza delivered to Copley Square."
   },
   {
     "question": "Can I correct a detail?",
-    "answer": "Yes. For example, say: Change that to one Garden Pizza and make it pickup. The assistant will update the spoken draft."
+    "answer": "Yes. For example, say: Change that to one Garden Pizza and make it pickup. The assistant updates the cart and asks you to confirm the new quote."
   },
   {
     "question": "What happens to my request?",
-    "answer": "This is a fictional exercise. The assistant gives a verbal recap for this conversation."
+    "answer": "With business tools configured, confirmation creates a demo order or table reservation. Try asking for a table for four tomorrow at 6:30 p.m."
   }
 ];
 

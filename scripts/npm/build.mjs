@@ -9,6 +9,17 @@ const git = (...args) => execFileSync('git', ['-C', root, ...args], { encoding: 
 const rootFiles = new Set(['package.json', 'pnpm-lock.yaml', 'env.local.example', 'README.md', 'README.zh-CN.md', 'README.ja.md', 'AGENTS.md', 'CLAUDE.md', 'ARCHITECTURE.md', 'RECIPE.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'Dockerfile', '.dockerignore', '.gitignore', '.gitattributes', '.npmrc', '.nvmrc', '.vercelignore', 'components.json', 'eslint.config.mjs', 'next.config.mjs', 'postcss.config.mjs', 'tsconfig.json', 'vercel.json']);
 const roots = new Set(['app', 'components', 'lib', 'types', 'styles', 'public', 'scripts']);
 const workflows = new Set(['.github/workflows/ci.yml', '.github/workflows/docker.yml']);
+// Required restaurant sources may be untracked while testing a local scaffold.
+const restaurantSources = [
+  'app/api/restaurant/state/route.ts',
+  'app/api/restaurant/tools/route.ts',
+  'components/RestaurantReceipt.tsx',
+  'lib/restaurant/business.ts',
+  'lib/restaurant/routes.ts',
+  'lib/restaurant/store.ts',
+  'lib/restaurant/types.ts',
+  'scripts/verify-restaurant.ts',
+];
 
 try {
   if (Number(process.versions.node.split('.')[0]) !== 24) throw new Error('Build with Node.js 24.');
@@ -25,7 +36,8 @@ try {
     git('merge-base', '--is-ancestor', sourceCommit, 'origin/main');
   }
   const tracked = git('ls-files', '-z').split('\0').filter(Boolean);
-  const selected = tracked.filter(file => {
+  const candidates = args.length ? tracked : [...new Set([...tracked, ...restaurantSources])];
+  const selected = candidates.filter(file => {
     const parts = file.split('/');
     return (rootFiles.has(file) || roots.has(parts[0]) || workflows.has(file) || file === 'docs/recipe-cover.webp') &&
       !file.startsWith('scripts/npm/') &&

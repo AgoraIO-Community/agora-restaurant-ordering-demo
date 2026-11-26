@@ -6,6 +6,7 @@ import type { AgentSignalSnapshot } from '@/lib/agent-signal';
 import { ScenarioIdentity } from './ScenarioIdentity';
 import { Dialog } from './ui/dialog';
 import { ScenarioFaq } from './ScenarioFaq';
+import { RestaurantReceipt } from './RestaurantReceipt';
 import { ConversationWorkspace } from './ConversationWorkspace';
 import { QuickstartPreCallCard } from './QuickstartPreCallCard';
 import { ScenarioInspector } from './ScenarioInspector';
@@ -70,6 +71,7 @@ const SESSION_LIMIT_MS = 10 * 60 * 1000;
 
 export default function LandingPage() {
   const [showConversation, setShowConversation] = useState(false);
+  const [restaurantReadToken, setRestaurantReadToken] = useState<string | null>(null);
   const ui = useScenarioUi();
   const [buildOpen, setBuildOpen] = useState(false);
   const buildTrigger = useRef<HTMLButtonElement>(null);
@@ -111,6 +113,7 @@ export default function LandingPage() {
     ui.start();
     setError(null);
     setAgentJoinError(false);
+    setRestaurantReadToken(null);
 
     try {
       // 1. Fetch RTC token + channel
@@ -166,6 +169,7 @@ export default function LandingPage() {
       ]);
 
       // 3. All dependencies ready — store state and show conversation
+      setRestaurantReadToken(agentData?.restaurant_read_token ?? null);
       setRtmClient(rtm);
       setAgoraData({ ...responseData, agentId: agentData?.agent_id, startedAt: Date.now() });
       setShowConversation(true);
@@ -280,12 +284,14 @@ export default function LandingPage() {
   return (
     <ScenarioShell ui={ui} active={showConversation} loading={isLoading} error={error} disabled={false} onStart={handleStartConversation} endedByTimeout={endedByTimeout}
       onBuild={openBuild} buildOpen={buildOpen} onBuildOpenChange={setBuildOpen} onCloseBuildAutoFocus={restoreBuildFocus}
+      sessionResult={!showConversation && restaurantReadToken ? <RestaurantReceipt token={restaurantReadToken} active={false} /> : undefined}
     >
       {agentJoinError && <p role="alert">The assistant could not connect. End this session and try again.</p>}
       {error && <p className="demo-workspace-fallback" role="alert">{error}</p>}
       {showConversation && agoraData && rtmClient && <Suspense fallback={<LoadingSkeleton />}><ErrorBoundary><AgoraProvider>
         <ConversationComponent agoraData={agoraData} rtmClient={rtmClient} onTokenWillExpire={handleTokenWillExpire} onEndConversation={handleEndConversation}
           onBuild={openBuild}
+          feedback={restaurantReadToken ? <RestaurantReceipt token={restaurantReadToken} active /> : undefined}
           onActivityChange={ui.setActivity} onInspectionChange={ui.setInspection} ending={ending} sessionTimeRemaining={sessionTimeRemaining}
           startupError={agentJoinError ? "The assistant could not connect. End this session and try again." : undefined} />
       </AgoraProvider></ErrorBoundary></Suspense>}
@@ -312,7 +318,7 @@ function useScenarioUi() {
 
 type ScenarioUi = ReturnType<typeof useScenarioUi>;
 
-function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, onBuild, buildOpen, onBuildOpenChange, onCloseBuildAutoFocus, children, business, endedByTimeout = false }: {
+function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, onBuild, buildOpen, onBuildOpenChange, onCloseBuildAutoFocus, children, sessionResult, endedByTimeout = false }: {
   ui: ScenarioUi;
   active: boolean;
   loading: boolean;
@@ -324,7 +330,7 @@ function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, 
   onBuildOpenChange: (open: boolean) => void;
   onCloseBuildAutoFocus: (event: Event) => void;
   children: ReactNode;
-  business?: ReactNode;
+  sessionResult?: ReactNode;
   endedByTimeout?: boolean;
 }) {
   const scenario = getScenarioPresentation();
@@ -354,6 +360,7 @@ function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, 
                 )}
               </div>
             </div>
+            <div className="demo-session-feedback">{sessionResult}</div>
             <ConversationPanel id="last-session-transcript" name={scenario.name} messages={inspection.messages} pending={false} voiceState="ended" className="demo-conversation" />
             <div className="demo-ended-actions">
               <Button variant="outline" disabled={disabled || loading} onClick={onStart}>Start again</Button>
@@ -364,7 +371,6 @@ function ScenarioShell({ ui, active, loading, error, disabled = false, onStart, 
           <QuickstartPreCallCard scenario={scenario} isLoading={loading} disabled={disabled} error={error} onStart={onStart} onBuild={onBuild} />
         )}
       </ConversationWorkspace>
-      {business ? <section className="demo-business" aria-label={`${scenario.name} details`}>{business}</section> : null}
       <ScenarioInspector scenario={scenario} snapshot={inspection} outcome={ui.outcome} onOutcomeChange={ui.setOutcome} open={inspectorOpen} onOpenChange={setInspectorOpen} />
       <DeveloperGuide scenario={scenario} open={buildOpen} onOpenChange={onBuildOpenChange} onCloseAutoFocus={onCloseBuildAutoFocus} />
     </div>

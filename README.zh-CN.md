@@ -1,10 +1,10 @@
-# Agora Takeout & Delivery Ordering Demo
+# Agora 餐厅点餐与订桌 Demo
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
 本文仅翻译文档；应用界面使用英语。语音对话使用英语。
 
-按示例菜单选择菜品和数量，指定自取或配送，然后听取订单草稿。本演示使用虚构资料，对话结果以口头草稿为准。
+在波士顿的虚构餐厅 North Pier Pizza 点餐或订桌。路线时间使用演示数据。
 
 **[在线试用 →](https://agora-restaurant-ordering-demo.vercel.app/)**
 
@@ -25,7 +25,7 @@
 
 - 浏览示例菜单，选择菜品和数量。
 - 选择自取或配送，并在对话中修改订单。
-- 听取修改后的口头订单草稿。
+- 配置业务工具后可确认模拟订单或订桌记录。
 
 <a id="tech-stack"></a>
 
@@ -59,6 +59,8 @@ cd my-app
 然后按照下方步骤安装依赖并配置凭据。目标目录必须不存在或为空；生成器不会安装依赖或配置凭据。`@latest` 使用 npm 最新已发布版本，可能与仓库不同。维护者请参阅 [npm 发布与 Vercel 自动化说明（英文）](https://github.com/AgoraIO-Community/agora-restaurant-ordering-demo/blob/main/docs/npm-release.md)。
 
 ### 本地运行
+
+通过 `RESTAURANT_TOOL_ORIGIN` 配置可访问同一个 Next.js 进程的公开 HTTPS 地址以启用业务工具。默认提供菜单查询和口头草稿。
 
 需要 Node.js 24、pnpm 9.15.9，以及已启用 Conversational AI 的 [Agora 项目](https://console.agora.io/)。
 
@@ -143,7 +145,7 @@ I would like two Garden Pizzas for delivery.
 
 ### 能力范围是什么？
 
-浏览示例菜单，选择菜品和数量。 选择自取或配送，并在对话中修改订单。 听取修改后的口头订单草稿。
+浏览示例菜单，选择菜品和数量。 选择自取或配送，并在对话中修改订单。 配置业务工具后可确认模拟订单或订桌记录。
 
 ### 哪些内容不会实际执行？
 

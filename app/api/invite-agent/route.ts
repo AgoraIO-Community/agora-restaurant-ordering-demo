@@ -13,6 +13,9 @@ import { DEFAULT_AGENT_UID, TOKEN_LIFETIME_SECONDS } from '@/lib/agora';
 import { RUNTIME_PROFILE } from '@/lib/runtime-profile';
 import { getScenarioConfig, getScenarioPrompt } from '@/lib/agent-config';
 import { getScenarioTools } from '@/lib/agent-tools';
+import { bindRestaurantAgent, createRestaurantSession, revokeRestaurantTools } from '@/lib/restaurant/store';
+
+export const runtime = 'nodejs';
 
 // agentUid identifies the AI in the RTC channel and shares its default with the client.
 const agentUid = String(DEFAULT_AGENT_UID);
@@ -24,6 +27,7 @@ function requireEnv(name: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  let restaurantSession: ReturnType<typeof createRestaurantSession> | undefined;
   try {
     // --- 1. Parse request ---
 
@@ -47,7 +51,10 @@ export async function POST(request: NextRequest) {
     // AgoraClient authenticates API calls to the Agora Conversational AI service.
     // area: change to Area.EU or Area.AP for European or Asia-Pacific deployments.
     const scenario = getScenarioConfig();
-    const scenarioTools = getScenarioTools();
+    const toolOrigin = process.env.RESTAURANT_TOOL_ORIGIN;
+    if (toolOrigin) restaurantSession = createRestaurantSession();
+    const scenarioTools = getScenarioTools(toolOrigin, restaurantSession?.toolToken);
+    const toolsEnabled = scenarioTools.length > 0;
     // The explicit builder avoids the SDK 2.14 / agora-token 2.0.7
     // positional-argument mismatch that otherwise creates a one-second token.
     const token = ConvoAITokenBuilder.buildToken(
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest) {
     // Omit vendor API keys for supported models — AgentKit infers reseller presets on start (see Agora Console / billing).
     const agent = new Agent({
       client,
-      instructions: getScenarioPrompt(scenario.id),
+      instructions: getScenarioPrompt(scenario.id, toolsEnabled),
       greeting: scenario.greeting,
       failureMessage: 'Please wait a moment.',
       maxHistory: 50,
@@ -89,8 +96,7 @@ export async function POST(request: NextRequest) {
         },
       },
       // RTM is required for transcript events in the browser client.
-      // This first version never enables business tools.
-      advancedFeatures: { enable_rtm: true, enable_tools: false },
+      advancedFeatures: { enable_rtm: true, enable_tools: toolsEnabled },
       // Required for browser RTM events:
       // - data_channel: 'rtm' enables RTM delivery path for state/metrics/errors
       // - enable_error_message emits AGENT_ERROR payloads
@@ -167,14 +173,17 @@ export async function POST(request: NextRequest) {
     });
 
     const agentId = await session.start();
+    if (restaurantSession && agentId) bindRestaurantAgent(restaurantSession.toolToken, agentId);
 
     return NextResponse.json({
       agent_id: agentId,
       create_ts: Math.floor(Date.now() / 1000),
       state: 'RUNNING',
-    } as AgentResponse);
+      ...(restaurantSession ? { restaurant_read_token: restaurantSession.readToken } : {}),
+    } as AgentResponse, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
-    console.error('Error starting conversation:', error);
+    if (restaurantSession) revokeRestaurantTools(restaurantSession.toolToken);
+    console.error('Error starting conversation:', error instanceof Error ? error.name : 'unknown');
     return NextResponse.json(
       {
         error:

@@ -1,7 +1,7 @@
 {
   "name": "agora-restaurant-ordering-demo",
-  "version": "0.1.1",
-  "description": "Explore a sample menu and build a pickup or delivery order draft.",
+  "version": "0.1.2",
+  "description": "Order pizza for dine-in, pickup, or delivery, or reserve a table.",
   "private": true,
   "engines": {
     "node": "24.x"
@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "verify:api": "node --import tsx scripts/verify-api-contracts.ts",
     "typecheck": "tsc --noEmit",
-    "verify": "pnpm run doctor && pnpm run verify:template && pnpm run lint && pnpm run typecheck && pnpm run verify:api && pnpm run verify:conversation && pnpm run verify:signal && pnpm run verify:inspection && pnpm run verify:scenario && pnpm run build",
+    "verify": "pnpm run doctor && pnpm run verify:template && pnpm run lint && pnpm run typecheck && pnpm run verify:api && pnpm run verify:conversation && pnpm run verify:signal && pnpm run verify:inspection && pnpm run verify:scenario && pnpm run verify:restaurant && pnpm run build",
+    "verify:restaurant": "node --import tsx scripts/verify-restaurant.ts",
     "verify:scenario": "node --import tsx scripts/verify-scenario.ts",
     "verify:template": "node scripts/verify-template.mjs",
     "verify:docker": "node scripts/verify-docker.mjs",

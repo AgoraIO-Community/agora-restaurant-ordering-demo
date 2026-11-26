@@ -1,9 +1,11 @@
-# Takeout & Delivery Ordering architecture
+# Restaurant ordering and reservations
 
-The browser uses Agora RTC for media and RTM for transcripts and Agent events. Next.js routes sign tokens and start or stop the managed Agent. The Invite route supplies the scenario prompt and uses the empty list from `lib/agent-tools.ts`.
+Agora RTC carries audio. RTM carries transcripts and agent events. Next.js signs tokens and manages the agent lifecycle. When `RESTAURANT_TOOL_ORIGIN` is set, the invitation registers functions that call `POST /api/restaurant/tools` using a per-call bearer token.
 
-The [workflow](lib/agent-config.ts) combines the scenario instructions with [fictional reference material](lib/scenario-knowledge.ts) and shared conversational guidance. [Presentation](lib/presentation.ts) provides the user-facing description and practice request.
+The business routes keep the cart, latest quote, and confirmation results in process memory. Order confirmation accepts the current unexpired quote ID. Table confirmation checks availability and records the reservation synchronously. Retrying a confirmed ID returns its existing number. The browser uses a separate read token for `GET /api/restaurant/state`.
 
-The Agent keeps the current draft in conversational context. Do not collect a delivery address, phone number or payment details. Do not quote an all-in total, claim delivery coverage or promise allergen safety. Do not claim an order was submitted, paid for or sent to the kitchen.
+When the stop endpoint succeeds or Agora reports that the agent is already stopping or stopped, the app revokes the tool token. The browser can still retrieve confirmed orders and reservations with its read token. That token expires one hour after session creation.
 
-The canonical offline check is `pnpm run verify`. Live acceptance uses a configured Agora project and checks the prompt behavior in a browser call.
+The demo routes are behind `RestaurantRouteProvider` in [routes.ts](lib/restaurant/routes.ts). Its async lookup returns travel time, distance and the source. The business logic uses that contract for route answers and delivery quotes. The included provider uses Boston fixtures.
+
+Run voice invitation, callbacks, and page reads in the same Next.js process. Restarting that process clears the demo sessions and reservations.
