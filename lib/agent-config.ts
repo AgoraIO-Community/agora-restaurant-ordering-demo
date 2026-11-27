@@ -6,7 +6,7 @@ const ORDER_FLOW = 'When a caller wants to order but has not named an item, ask 
 
 export const config: ScenarioConfig = {
   id: 'restaurant-ordering',
-  title: 'Restaurant Ordering & Reservations',
+  title: 'Takeout & Delivery Ordering',
   role: 'order desk assistant at the fictional North Pier Pizza in Boston',
   workflow: [
     'Answer menu, hours, route, order and table questions in the order the caller brings them up.',

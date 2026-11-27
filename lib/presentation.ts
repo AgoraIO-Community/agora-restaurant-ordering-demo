@@ -3,7 +3,7 @@ export type { ScenarioPresentation } from '@/types/presentation';
 
 export const presentation: ScenarioPresentation = {
   "id": "restaurant-ordering",
-  "name": "Restaurant Ordering & Reservations",
+  "name": "Takeout & Delivery Ordering",
   "purpose": "Order pizza for dine-in, pickup, or delivery, or book a table.",
   "summary": "Order pizza for dine-in, pickup, or delivery, or book a table.",
   "featuresHeading": "In this conversation",
@@ -40,7 +40,7 @@ export const presentation: ScenarioPresentation = {
   ],
   "developer": {
     "runCommand": "pnpm install --frozen-lockfile\npnpm run doctor\npnpm run dev",
-    "assistantPrompt": "Help me run the local Restaurant Ordering & Reservations demo from this repository. Read README.md and RECIPE.md. Use Node.js 24 and pnpm 9.15.9. Help me configure my own Agora project in .env.local, keeping the App Certificate server-side. Run the documented local verification. For the voice check, try this request and then correct one detail: I'd like a large Garden Pizza delivered to Copley Square. Report which checks ran.",
+    "assistantPrompt": "Help me run the local Takeout & Delivery Ordering demo from this repository. Read README.md and RECIPE.md. Use Node.js 24 and pnpm 9.15.9. Help me configure my own Agora project in .env.local, keeping the App Certificate server-side. Run the documented local verification. For the voice check, try this request and then correct one detail: I'd like a large Garden Pizza delivered to Copley Square. Report which checks ran.",
     "docsUrl": "https://docs.agora.io/en/ai/build/build-server-client",
     "sdkUrl": "https://github.com/AgoraIO/agora-agents-ts",
     "consoleUrl": "https://console.agora.io/",

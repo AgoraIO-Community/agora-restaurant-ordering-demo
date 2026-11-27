@@ -1,4 +1,4 @@
-# Agora 餐厅点餐与订桌 Demo
+# Agora 外带与外送点餐 Demo
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 

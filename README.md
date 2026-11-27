@@ -1,4 +1,4 @@
-# Agora Restaurant Ordering & Reservations Demo
+# Agora Takeout & Delivery Ordering Demo
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
