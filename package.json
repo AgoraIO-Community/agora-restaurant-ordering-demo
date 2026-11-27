@@ -1,6 +1,6 @@
 {
   "name": "agora-restaurant-ordering-demo",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Order pizza for dine-in, pickup, or delivery, or reserve a table.",
   "private": true,
   "engines": {
